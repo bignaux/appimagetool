@@ -20,7 +20,7 @@ fi
 
 if [ -e /usr/bin/yum ] ; then
   $SUDO yum -y install epel-release
-  $SUDO yum -y install git make binutils fuse glibc-devel glib2-devel fuse-devel gcc zlib-devel autoconf automake m4 libtool xz-devel lz4-devel patch openssl-devel vim-common inotify-tools-devel wget
+  $SUDO yum -y install git make binutils fuse glibc-devel glib2-devel fuse-devel gcc zlib-devel xz-devel lz4-devel patch openssl-devel vim-common inotify-tools-devel wget
 
   $SUDO wget --no-check-certificate https://copr.fedorainfracloud.org/coprs/praiskup/autotools/repo/epel-6/praiskup-autotools-epel-6.repo \
         -O /etc/yum.repos.d/autotools.repo
