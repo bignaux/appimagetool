@@ -19,6 +19,7 @@ if [ -e /usr/bin/apt-get ] ; then
 fi
 
 if [ -e /usr/bin/yum ] ; then
+  $SUDO yum -y install epel-release
   $SUDO yum -y install git make binutils fuse glibc-devel glib2-devel fuse-devel gcc zlib-devel autoconf automake libtool xz-devel lz4-devel
 fi
 
