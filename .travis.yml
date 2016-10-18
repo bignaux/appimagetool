@@ -1,32 +1,14 @@
 language: c
-sudo: required
-os: linux
-dist: trusty
+compiler: gcc
 
-before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y git autoconf libtool make gcc libtool libfuse-dev liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev 
-  # libtool-bin might be required in newer distributions but is not available in precise
-
-
+services:
+ - docker
+env:
+ - DOCKER_IMAGE=toopher/centos-i386:centos6
+ - DOCKER_IMAGE=library/centos:6
 script:
-  - bash -ex install-build-deps.sh
-  - bash -ex build.sh
-  - bash -ex build-appimage.sh
-  - curl --upload-file ./*.AppImage https://transfer.sh/appimagetool
-  - curl --upload-file ./build/validate https://transfer.sh/validate
-  - curl --upload-file ./build/appimaged https://transfer.sh/appimaged
-
-notifications:
-  irc:
-    channels:
-      - "chat.freenode.net#AppImage"
-    on_success: always  # options: [always|never|change] default: always
-    on_failure: always  # options: [always|never|change] default: always
-    on_start: never     # options: [always|never|change] default: always
-  webhooks:
-    urls:
-      - https://webhooks.gitter.im/e/4bf20518805a55998cc2
-    on_success: always  # options: [always|never|change] default: always
-    on_failure: always  # options: [always|never|change] default: always
-    on_start: never     # options: [always|never|change] default: always
+ - docker run -i -v "${PWD}:/appimagetool" "$DOCKER_IMAGE" /bin/bash -c "/appimagetool/build.sh"
+ - file out/*
+ - sudo chown -R travis:travis out
+ - wget https://raw.githubusercontent.com/probonopd/AppImages/26541d6542b7bdcca9cbd1804590862c1a935e27/bintray.sh
+ - for i in out/*; do bash bintray.sh "$i"; done
