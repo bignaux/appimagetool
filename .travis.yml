@@ -7,7 +7,7 @@ env:
  - DOCKER_IMAGE=toopher/centos-i386:centos6
  - DOCKER_IMAGE=library/centos:6
 script:
- - docker run -i -v "${PWD}:/appimagetool" "$DOCKER_IMAGE" /bin/bash -c "/appimagetool/build.sh"
+ - docker run -i -v "${PWD}:/appimagetool" "$DOCKER_IMAGE" /bin/bash -c "cd /appimagetool ; ./build.sh"
  - file out/*
  - sudo chown -R travis:travis out
  - wget https://raw.githubusercontent.com/probonopd/AppImages/26541d6542b7bdcca9cbd1804590862c1a935e27/bintray.sh
