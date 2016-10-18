@@ -26,7 +26,8 @@ if [ -e /usr/bin/yum ] ; then
   cd autoconf-2.69
   ./configure
   make
-  $SUDO make install 
+  $SUDO make install
+  cd ..
 fi
 
 # Install dependencies for Arch Linux
