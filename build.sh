@@ -19,25 +19,13 @@ if [ -e /usr/bin/apt-get ] ; then
 fi
 
 if [ -e /usr/bin/yum ] ; then
-  $SUDO yum -y install epel-release 
+  $SUDO yum -y install epel-release
   $SUDO yum -y install git make binutils fuse glibc-devel glib2-devel fuse-devel gcc zlib-devel autoconf automake m4 libtool xz-devel lz4-devel patch openssl-devel vim-common inotify-tools-devel wget
 
-  # autoconf and automake are too older (~2009)
-  wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz
-  tar xvfvz autoconf-2.69.tar.gz
-  cd autoconf-2.69
-  ./configure
-  make
-  $SUDO make install
-  cd ..
+  $SUDO wget --no-check-certificate https://copr.fedorainfracloud.org/coprs/praiskup/autotools/repo/epel-6/praiskup-autotools-epel-6.repo \
+        -O /etc/yum.repos.d/autotools.repo
+  $SUDO autotools-latest
 
-  wget http://ftp.gnu.org/gnu/automake/automake-1.14.tar.gz
-  tar xvzf automake-1.14.tar.gz
-  cd automake-1.14
-  ./configure
-  make
-  $SUDO make install
-  cd ..
 fi
 
 # Install dependencies for Arch Linux
