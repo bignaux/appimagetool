@@ -19,12 +19,12 @@ if [ -e /usr/bin/apt-get ] ; then
 fi
 
 if [ -e /usr/bin/yum ] ; then
-  $SUDO yum -y install git make binutils fuse glibc-devel glib2-devel fuse-devel gcc zlib-devel autoconf automake libtool
+  $SUDO yum -y install git make binutils fuse glibc-devel glib2-devel fuse-devel gcc zlib-devel autoconf automake libtool xz-devel lz4-devel
 fi
 
 # Install dependencies for Arch Linux
 if [ -e /usr/bin/pacman ] ; then
-  echo "Please submit a pull request if you would like to see Arch Linux support.
+  echo "Please submit a pull request if you would like to see Arch Linux support."
   exit 1
 fi
 
