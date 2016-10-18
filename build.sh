@@ -20,10 +20,20 @@ fi
 
 if [ -e /usr/bin/yum ] ; then
   $SUDO yum -y install epel-release
-  $SUDO yum -y install git make binutils fuse glibc-devel glib2-devel fuse-devel gcc zlib-devel autoconf automake libtool xz-devel lz4-devel patch openssl-devel vim-common inotify-tools-devel wget
+  $SUDO yum -y install git make binutils fuse glibc-devel glib2-devel fuse-devel gcc zlib-devel  libtool xz-devel lz4-devel patch openssl-devel vim-common inotify-tools-devel wget
+
+  # autoconf automake are too older (~2009)
   wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz
   tar xvfvz autoconf-2.69.tar.gz
   cd autoconf-2.69
+  ./configure
+  make
+  $SUDO make install
+  cd ..
+
+  wget http://ftp.gnu.org/gnu/automake/automake-1.14.tar.gz
+  tar xvzf automake-1.14.tar.gz
+  cd automake-1.14
   ./configure
   make
   $SUDO make install
