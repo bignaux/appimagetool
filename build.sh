@@ -21,6 +21,13 @@ fi
 if [ -e /usr/bin/yum ] ; then
   $SUDO yum -y install epel-release
   $SUDO yum -y install git make binutils fuse glibc-devel glib2-devel fuse-devel gcc zlib-devel autoconf automake libtool xz-devel lz4-devel patch openssl-devel vim-common inotify-tools-devel
+
+  wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz
+  tar xvfvz autoconf-2.69.tar.gz
+  cd autoconf-2.69
+  ./configure
+  make
+  $SUDO make install 
 fi
 
 # Install dependencies for Arch Linux
