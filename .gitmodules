@@ -1,6 +1,8 @@
 [submodule "squashfuse"]
 	path = squashfuse
 	url = https://github.com/vasi/squashfuse.git
+	ignore = dirty
 [submodule "squashfs-tools"]
 	path = squashfs-tools
 	url = https://github.com/AppImage/squashfs-tools.git
+	ignore = dirty
