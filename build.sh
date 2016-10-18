@@ -44,11 +44,7 @@ if [ ! -e ./ll.c.orig ]; then patch -p1 --backup < ../squashfuse.patch ; fi
 # Build libsquashfuse_ll library
 
 if [ ! -e ./Makefile ] ; then
-  libtoolize --force
-  aclocal
-  autoheader
-  automake --force-missing --add-missing
-  autoconf
+  ./autogen.sh
   ./configure --disable-demo --disable-high-level \
     --with-xz=/usr/lib/ --without-lzo
 fi
