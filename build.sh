@@ -24,7 +24,7 @@ if [ -e /usr/bin/yum ] ; then
 
   $SUDO wget --no-check-certificate https://copr.fedorainfracloud.org/coprs/praiskup/autotools/repo/epel-6/praiskup-autotools-epel-6.repo \
         -O /etc/yum.repos.d/autotools.repo
-  $SUDO autotools-latest
+  $SUDO yum -y install autotools-latest
 
 fi
 
