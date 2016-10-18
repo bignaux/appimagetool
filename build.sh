@@ -1,9 +1,32 @@
 #!/bin/bash
 
 #
-# This is supposed to be run on Travis CI trusty. Also works for me on Ubuntu 16.04.
-# I don't have the time to mess around with autotools and the like.
+# This script installs the required build-time dependencies
+# and builds AppImage
 #
+
+HERE="$(dirname "$(readlink -f "${0}")")"
+
+# Figure out whether we should use sudo
+SUDO=''
+if (( $EUID != 0 )); then
+    SUDO='sudo'
+fi
+
+if [ -e /usr/bin/apt-get ] ; then
+  $SUDO apt-get update
+  $SUDO bash -ex ./install-build-deps.sh
+fi
+
+if [ -e /usr/bin/yum ] ; then
+  $SUDO yum -y install git make binutils fuse glibc-devel glib2-devel fuse-devel gcc zlib-devel 
+fi
+
+# Install dependencies for Arch Linux
+if [ -e /usr/bin/pacman ] ; then
+  echo "Please submit a pull request if you would like to see Arch Linux support.
+  exit 1
+fi
 
 # Clean up from previous run
 rm -rf build/ || true
