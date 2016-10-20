@@ -7,6 +7,7 @@ MAGIC         = echo "8: 414902" | xxd -r -
 MKDIR         = mkdir -p
 COPY          = cp -f
 COPY_FILE     = $(COPY)
+OBJECTS		  = runtime.o notify.o elf.o getsection.o ylog/ylog.o
 
 all: runtime
 .PHONY: all embed mrproper
@@ -32,7 +33,7 @@ embed: 1024_blank_bytes runtime
 
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
 # TODO: generate runtime in function of the compressor we choose to avoid embeded unnecessary compression.
-runtime: runtime.o notify.o elf.o getsection.o ylog/ylog.o
+runtime: $(OBJECTS)
 	$(CC) $(CFLAGS) $^ ./squashfuse/.libs/libsquashfuse_ll.a \
 	./squashfuse/.libs/libsquashfuse.a ./squashfuse/.libs/libfuseprivate.a \
 	-l:liblzma.a -l:liblz4.a -l:libz.a -l:libinotifytools.a \
@@ -47,7 +48,7 @@ install: runtime embed
 	$(MAGIC) build/runtime
 
 clean:
-	rm -f *.o 1024_blank_bytes
+	rm -f $(OBJECTS) 1024_blank_bytes
 
 mrproper: clean
 	rm -f runtime
