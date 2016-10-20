@@ -51,6 +51,8 @@
 
 #include <fnmatch.h>
 
+#include "ylog/ylog.h"
+
 //#include "notify.c"
 extern int notify(char *title, char *body, int timeout);
 
@@ -154,6 +156,8 @@ main (int argc, char *argv[])
 {
     char appimage_path[PATH_MAX];
     char * arg;
+
+    ylog_set_level(YLOG_DEBUG, getenv("YLOG_LEVEL"));
     
     /* We might want to operate on a target appimage rather than this file itself,
      * e.g., for appimaged which must not run untrusted code from random AppImages.
@@ -415,6 +419,7 @@ main (int argc, char *argv[])
         /* If we are operating on an AppImage different from this file,
          * then we do not execute the payload */
         if(getenv("TARGET_APPIMAGE") == NULL){
+            yinfo("mount_dir : %s", mount_dir);
             /* TODO: Find a way to get the exit status and/or output of this */
             execv (filename, real_argv);
             /* Error if we continue here */
@@ -423,5 +428,5 @@ main (int argc, char *argv[])
         }
     }
     
-    return 0;
+    return EXIT_SUCCESS;
 }

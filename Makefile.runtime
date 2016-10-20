@@ -1,3 +1,5 @@
+# Copyright (c) 2016 Bignaux Ronan
+
 CC            = gcc
 CFLAGS        = -std=gnu99 -Wall -Wno-unused-parameter -Wno-unused-result -Wformat-security -Os -g
 STRIP         = strip
@@ -30,10 +32,11 @@ embed: 1024_blank_bytes runtime
 
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
 # TODO: generate runtime in function of the compressor we choose to avoid embeded unnecessary compression.
-runtime: runtime.o notify.o elf.o getsection.o
+runtime: runtime.o notify.o elf.o getsection.o ylog/ylog.o
 	$(CC) $(CFLAGS) $^ ./squashfuse/.libs/libsquashfuse_ll.a \
 	./squashfuse/.libs/libsquashfuse.a ./squashfuse/.libs/libfuseprivate.a \
-	-lfuse -lpthread -lz -linotifytools -ldl `pkg-config --libs liblzma liblz4` -o runtime
+	-l:liblzma.a -l:liblz4.a -l:libz.a \
+	-lfuse -lpthread -linotifytools -ldl -o runtime
 
 install: runtime embed
 	$(MKDIR) build
