@@ -1,3 +1,5 @@
+# Copyright (c) 2016 Bignaux Ronan
+
 RUNTIME				?=	./build/runtime
 APPNAME				?=	appimagetool
 transport			?=	bintray-zsync
@@ -16,6 +18,22 @@ all: $(APPNAME).AppImage
 
 %.squashfs: %.AppDir $(shell find $(APPNAME).AppDir)
 	mksquashfs $< $@ $(mksquashfs_options)
+
+%.sha256: %.AppImage
+	sha256sum $< | cut -d " " -f 1 > $@
+
+%.asc: %.sha256
+	gpg2 --detach-sign --armor $< -o $@
+	cat $@
+
+#objdump -h -j .sha256_sig krita-3.0.1.1-x86_64.AppImage
+printoffset: $(APPNAME).AppImage
+	SIGHEXOFFSET=$$(objdump -h $< | grep .sha256_sig | awk '{print $6}')
+	SIGHEXLENGTH=$$(objdump -h $< | grep .gpg_sig | awk '{print $3}')
+	echo $(SIGHEXOFFSET) $(SIGHEXLENGTH)
+
+#%.asc : %.AppImage
+#	digest $< > $@
 
 clean:
 	rm -f $(APPNAME).squashfs
