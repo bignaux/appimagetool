@@ -3,6 +3,9 @@
 set -e
 set -x
 
+HERE="$(dirname "$(readlink -f "${0}")")"
+
+
 #
 # This script installs the required build-time dependencies
 # and builds AppImage
@@ -10,40 +13,7 @@ set -x
 
 HERE="$(dirname "$(readlink -f "${0}")")"
 
-if [ -e /usr/bin/apt-get ] ; then
-  apt-get update
-  bash -ex ./install-build-deps.sh
-fi
-
-if [ -e /usr/bin/yum ] ; then
-  # Install and enable EPEL and Devtoolset-3 by Software Collections
-  # https://www.softwarecollections.org/en/scls/rhscl/devtoolset-3/
-  yum -y install centos-release-scl-rh epel-release
-  yum -y install devtoolset-3-gcc.x86_64
-  # Install and enable Autotools by Pavel Raiskup
-  # https://www.softwarecollections.org/en/scls/praiskup/autotools/
-  rpm -ivh https://www.softwarecollections.org/en/scls/praiskup/autotools/epel-6-x86_64/download/praiskup-autotools-epel-6-x86_64.noarch.rpm
-  yum -y install autotools-latest # 19 MB
-
-  yum -y install epel-release
-  yum -y install git wget make binutils fuse glibc-devel glib2-devel fuse-devel zlib-devel patch openssl-devel vim-common # inotify-tools-devel lz4-devel
-  . /opt/rh/devtoolset-3/enable
-  . /opt/rh/autotools-latest/enable
-
-  # Unlike Ubuntu, CentOS does not provide .a, so we need to build it
-  wget http://tukaani.org/xz/xz-5.2.2.tar.gz
-  tar xzfv xz-5.2.2.tar.gz 
-  cd xz-5.2.2
-  ./configure --enable-static && make && make install
-  rm /usr/local/lib/liblzma.so* /usr/*/liblzma.so || true # Don't want the dynamic one
-  cd -
-fi
-
-# Install dependencies for Arch Linux
-if [ -e /usr/bin/pacman ] ; then
-  echo "Please submit a pull request if you would like to see Arch Linux support."
-  exit 1
-fi
+which git 2>&1 >/dev/null || . "$HERE/install-build-deps.sh"
 
 # Fetch git submodules
 git submodule init
@@ -52,18 +22,21 @@ git submodule update
 # Clean up from previous run
 rm -rf build/ || true
 
+# Build inotify-tools; the one from CentOS does not have .a
+
+if [ ! -e "./inotify-tools-3.14/libinotifytools/src/.libs/libinotifytools.a" ] ; then
+    wget -c http://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz
+    tar xf inotify-tools-3.14.tar.gz
+    cd inotify-tools-3.14
+    ./configure --prefix=/usr && make && sudo make install
+    cd -
+    sudo rm /usr/*/libinotifytools.so* /usr/local/lib/libinotifytools.so* 2>/dev/null || true # Don't want the dynamic one
+fi
+
 # Patch squashfuse_ll to be a library rather than an executable
 
 cd squashfuse
 if [ ! -e ./ll.c.orig ]; then patch -p1 --backup < ../squashfuse.patch ; fi
-
-# Build inotify-tools; the one from does not have .a
-wget -c http://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz
-tar xf inotify-tools-3.14.tar.gz
-cd inotify-tools-3.14
-./configure --prefix=/usr && make && su -c 'make install'
-cd -
-rm /usr/*/libinotifytools.so* /usr/local/lib/libinotifytools.so* || true # Don't want the dynamic one
 
 # Build libsquashfuse_ll library
 
@@ -76,7 +49,7 @@ if [ ! -e ./Makefile ] ; then
   autoreconf -fi || true # Errors out, but the following succeeds then?
   autoconf
   sed -i '/PKG_CHECK_MODULES.*/,/,:./d' configure # https://github.com/vasi/squashfuse/issues/12
-  ./configure --disable-demo --disable-high-level --without-lzo --with-xz=/usr/lib/
+  ./configure --disable-demo --disable-high-level --without-lzo --without-lz4 --with-xz=/usr/lib/
 fi
 
 bash --version
@@ -162,6 +135,9 @@ cc data.o appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.
 # appimaged, an optional component
 cc -std=gnu99 ../getsection.c -Wl,-Bdynamic -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" ../elf.c ../appimaged.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -I../squashfuse/ -Wl,-Bstatic -linotifytools -Wl,-Bdynamic $(pkg-config --cflags --libs glib-2.0) $(pkg-config --cflags gio-2.0) $(pkg-config --libs gio-2.0) -ldl -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimaged # liblz4
 
+# AppRun
+cc ../AppRun.c -o AppRun
+
 cd ..
 
 # Strip and check size and dependencies
@@ -175,8 +151,9 @@ for FILE in $(ls build/*) ; do
   ldd "build/$FILE" || true
 done
 
-bash -ex build-appimage.sh
-curl --upload-file ./*.AppImage https://transfer.sh/appimagetool
+bash -ex "$HERE/build-appimage.sh"
+curl --upload-file ./appimagetool-*.AppImage https://transfer.sh/appimagetool
+curl --upload-file ./build/appimaged https://transfer.sh/appimaged
 
 mkdir -p /out/
 cp build/* ./*.AppImage /out/

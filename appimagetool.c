@@ -248,6 +248,25 @@ static GOptionEntry entries[] =
 int
 main (int argc, char *argv[])
 {
+    /* Parse VERSION environment variable.
+     * We cannot use g_environ_getenv (g_get_environ() since it is too new for CentOS 6 */
+    char* version_env;
+    version_env = getenv("VERSION");
+
+    /* Parse OWD environment variable.
+     * If it is available then cd there. It is the original CWD prior to running AppRun */
+    char* owd_env = NULL;
+    owd_env = getenv("OWD");    
+    if(NULL!=owd_env){
+        int ret;
+        ret = chdir(owd_env);
+        if (ret != 0){
+            fprintf(stderr, "Could not cd into %s\n", owd_env);
+            exit(1);
+            
+        }
+    }
+        
     GError *error = NULL;
     GOptionContext *context;
     char command[PATH_MAX];
@@ -257,7 +276,7 @@ main (int argc, char *argv[])
     // g_option_context_add_group (context, gtk_get_option_group (TRUE));
     if (!g_option_context_parse (context, &argc, &argv, &error))
     {
-        g_print("option parsing failed: %s\n", error->message);
+        fprintf(stderr, "Option parsing failed: %s\n", error->message);
         exit(1);
     }
 
@@ -372,11 +391,10 @@ main (int argc, char *argv[])
             if(verbose)
                 fprintf (stderr,"dest_path: %s\n", dest_path);
             
-//            if(g_environ_getenv (g_get_environ (), "VERSION"))
-//                sprintf (dest_path, "%s-%s-%s.AppImage", app_name_for_filename,
-//                        g_environ_getenv (g_get_environ (), "VERSION"), arch);
-                
-                destination = dest_path;
+            if (version_env!=NULL)
+                sprintf (dest_path, "%s-%s-%s.AppImage", app_name_for_filename, version_env, arch);
+            
+            destination = dest_path;
             replacestr(destination, " ", "_");
             
             // destination = basename(br_strcat(source, ".AppImage"));

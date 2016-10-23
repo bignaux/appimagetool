@@ -16,20 +16,20 @@ cp mksquashfs ../../build
 
 cd ../../
 
+cp build/AppRun appimagetool.AppDir/
 cp build/appimagetool appimagetool.AppDir/usr/bin/
 cp build/mksquashfs appimagetool.AppDir/usr/bin/
 
-cp resources/appimagetool.desktop appimagetool.AppDir
-cp resources/appimagetool.svg appimagetool.AppDir
+cp resources/appimagetool.desktop appimagetool.AppDir/
+cp resources/appimagetool.svg appimagetool.AppDir/
 
 cd appimagetool.AppDir
-ln -s appimagetool.svg .DirIcon
-ln -s usr/bin/appimagetool AppRun
+ln -sf appimagetool.svg .DirIcon
 cd ..
 
 # Eat our own dogfood
 PATH="$PATH:build"
-appimagetool appimagetool.AppDir
+appimagetool appimagetool.AppDir/
 
 # Test whether it has worked
 ls -lh ./*.AppImage
